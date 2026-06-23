@@ -10,9 +10,11 @@ This project is a minimal A-share ETF research stack for the path we discussed:
 
 - `config/universe.yaml`: strategy and data parameters
 - `config/etf_watchlist.csv`: your editable ETF watchlist with grouping fields
+- `config/presets.yaml`: named portfolio presets built from your watchlist tags
 - `scripts/fetch_etf_history.py`: fetch and cache ETF daily history from AKShare
 - `scripts/run_rotation_backtest.py`: run a simple momentum rotation backtest
 - `scripts/run_grouped_backtests.py`: batch backtest every ETF group or strategy tag
+- `scripts/run_preset_backtests.py`: batch backtest named preset portfolios
 - `reports/rotation/`: generated equity curve, weights, and summary metrics
 
 ## Sample universe
@@ -102,6 +104,31 @@ python .\scripts\run_grouped_backtests.py --group-field group --values broad,gro
 ```
 
 This writes aggregate files such as `reports/rotation/summary_by_group.csv`.
+
+## Run named presets
+
+The repository also includes named preset portfolios in `config/presets.yaml`, for example:
+
+- `core_base`
+- `broad_rotation`
+- `overseas_mix`
+- `candidate_pool`
+
+Run all presets:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python .\scripts\run_preset_backtests.py
+```
+
+Run a single preset:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python .\scripts\run_preset_backtests.py --preset candidate_pool
+```
+
+This writes aggregate files such as `reports/presets/summary_by_preset.csv`.
 
 The sample strategy rebalances every 5 trading days, ranks ETFs by 20-day momentum, and holds the top 1 ETF when its momentum is positive. Transaction costs are approximated with commission and slippage in basis points.
 

@@ -64,3 +64,29 @@ def filter_universe(
     if not filtered:
         raise ValueError("no instruments matched the requested universe filters")
     return filtered
+
+
+def apply_universe_filters(
+    universe: list[dict[str, str]],
+    *,
+    groups: list[str] | None = None,
+    strategy_tags: list[str] | None = None,
+    instrument_types: list[str] | None = None,
+    symbols: list[str] | None = None,
+) -> list[dict[str, str]]:
+    filtered = universe
+    if groups:
+        allowed_groups = set(groups)
+        filtered = [item for item in filtered if item.get("group") in allowed_groups]
+    if strategy_tags:
+        allowed_tags = set(strategy_tags)
+        filtered = [item for item in filtered if item.get("strategy_tag") in allowed_tags]
+    if instrument_types:
+        allowed_types = {value.upper() for value in instrument_types}
+        filtered = [item for item in filtered if item.get("instrument_type", "").upper() in allowed_types]
+    if symbols:
+        allowed_symbols = set(symbols)
+        filtered = [item for item in filtered if item.get("symbol") in allowed_symbols]
+    if not filtered:
+        raise ValueError("no instruments matched the requested preset filters")
+    return filtered

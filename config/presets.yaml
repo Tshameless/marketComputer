@@ -1,0 +1,31 @@
+presets:
+  core_base:
+    strategy_tags:
+      - core
+
+  broad_rotation:
+    groups:
+      - broad
+      - growth
+    strategy_tags:
+      - core
+      - satellite
+
+  overseas_mix:
+    groups:
+      - overseas
+      - commodity
+    instrument_types:
+      - ETF
+      - LOF
+
+  candidate_pool:
+    strategy_tags:
+      - candidate
+
+  thematic_candidates:
+    groups:
+      - theme
+      - sector
+    strategy_tags:
+      - candidate
