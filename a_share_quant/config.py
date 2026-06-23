@@ -43,6 +43,8 @@ def load_universe_csv(path: str | Path) -> list[dict[str, str]]:
                     "symbol": symbol,
                     "name": name,
                     "enabled": parse_enabled_value(row.get("enabled")),
+                    "priority": parse_priority_value(row.get("priority")),
+                    "target_weight_hint": parse_target_weight_hint_value(row.get("target_weight_hint")),
                     "instrument_type": ((row.get("instrument_type") or "ETF").strip() or "ETF").upper(),
                     "group": (row.get("group") or "").strip(),
                     "strategy_tag": (row.get("strategy_tag") or "").strip(),
@@ -59,6 +61,20 @@ def parse_enabled_value(raw_value: str | None) -> bool:
     if value in {"0", "false", "no", "n", "off"}:
         return False
     raise ValueError(f"invalid enabled value: {raw_value}")
+
+
+def parse_priority_value(raw_value: str | None) -> int | None:
+    value = (raw_value or "").strip()
+    if not value:
+        return None
+    return int(value)
+
+
+def parse_target_weight_hint_value(raw_value: str | None) -> float | None:
+    value = (raw_value or "").strip()
+    if not value:
+        return None
+    return float(value)
 
 
 def filter_universe(

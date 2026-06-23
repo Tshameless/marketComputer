@@ -32,14 +32,16 @@ You can replace these with your own ETF or fund pool by editing `config/etf_watc
 The CSV format is:
 
 ```csv
-symbol,name,enabled,instrument_type,group,strategy_tag,notes
-510300,沪深300ETF,1,ETF,broad,core,宽基核心仓位
-164701,汇添富黄金及贵金属(QDII-LOF-FOF)A,1,LOF,commodity,candidate,黄金主题补充
+symbol,name,enabled,priority,target_weight_hint,instrument_type,group,strategy_tag,notes
+510300,沪深300ETF,1,1,0.30,ETF,broad,core,宽基核心仓位
+164701,汇添富黄金及贵金属(QDII-LOF-FOF)A,1,3,0.05,LOF,commodity,candidate,黄金主题补充
 ```
 
 Suggested meaning:
 
 - `enabled`: `1` means the symbol is active in normal fetches and backtests; `0` keeps it in the watchlist but skips it by default
+- `priority`: lower numbers mean higher research or trading priority
+- `target_weight_hint`: optional placeholder weight for research organization; it does not change the current backtest engine
 - `instrument_type`: currently supports `ETF` and `LOF`
 - `group`: your pool grouping such as `broad`, `dividend`, `bond`, `commodity`
 - `strategy_tag`: your usage tag such as `core`, `satellite`, `rotation`
@@ -133,6 +135,8 @@ python .\scripts\run_preset_backtests.py --preset candidate_pool --include-disab
 ```
 
 This writes aggregate files such as `reports/presets/summary_by_preset.csv`.
+
+Each preset folder also includes a `constituents.csv` file with the watchlist metadata for that preset.
 
 The sample strategy rebalances every 5 trading days, ranks ETFs by 20-day momentum, and holds the top 1 ETF when its momentum is positive. Transaction costs are approximated with commission and slippage in basis points.
 

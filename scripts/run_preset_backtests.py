@@ -46,6 +46,40 @@ def load_presets(path: str | Path) -> dict[str, dict]:
     return presets
 
 
+def build_constituents_frame(universe: list[dict[str, object]]) -> pd.DataFrame:
+    frame = pd.DataFrame(universe).copy()
+    sort_columns: list[str] = []
+    ascending: list[bool] = []
+    if "priority" in frame.columns:
+        sort_columns.append("priority")
+        ascending.append(True)
+    sort_columns.append("symbol")
+    ascending.append(True)
+    return frame.sort_values(sort_columns, ascending=ascending, na_position="last").reset_index(drop=True)
+
+
+def summarize_universe_metadata(universe: list[dict[str, object]]) -> dict[str, object]:
+    frame = build_constituents_frame(universe)
+    summary: dict[str, object] = {}
+
+    if "priority" in frame.columns:
+        priority_series = pd.to_numeric(frame["priority"], errors="coerce").dropna()
+        if not priority_series.empty:
+            summary["priority_min"] = int(priority_series.min())
+            summary["priority_max"] = int(priority_series.max())
+            summary["priority_avg"] = round(float(priority_series.mean()), 4)
+            top_priority = frame[frame["priority"] == priority_series.min()]["symbol"].astype(str).tolist()
+            summary["top_priority_symbols"] = ",".join(top_priority)
+
+    if "target_weight_hint" in frame.columns:
+        weight_series = pd.to_numeric(frame["target_weight_hint"], errors="coerce").dropna()
+        if not weight_series.empty:
+            summary["target_weight_hint_sum"] = round(float(weight_series.sum()), 6)
+            summary["target_weight_hint_avg"] = round(float(weight_series.mean()), 6)
+
+    return summary
+
+
 def run_single_preset(
     root: Path,
     config: dict,
@@ -62,6 +96,7 @@ def run_single_preset(
         symbols=preset_filters.get("symbols"),
         include_disabled=include_disabled,
     )
+    constituents = build_constituents_frame(universe)
     symbols = [item["symbol"] for item in universe]
     history_map = load_cached_histories(root / "data" / "cache", symbols)
     close_matrix = build_close_matrix(history_map)
@@ -79,11 +114,13 @@ def run_single_preset(
         initial_capital=float(settings["initial_capital"]),
     )
     write_report(result, output_dir)
+    constituents.to_csv(output_dir / "constituents.csv", index=False, encoding="utf-8-sig")
     summary_row: dict[str, object] = {
         "preset": preset_name,
         "instrument_count": len(symbols),
         "symbols": ",".join(symbols),
     }
+    summary_row.update(summarize_universe_metadata(universe))
     summary_row.update(result.metrics)
     return summary_row
 
