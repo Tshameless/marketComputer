@@ -12,6 +12,7 @@ This project is a minimal A-share ETF research stack for the path we discussed:
 - `config/etf_watchlist.csv`: your editable ETF watchlist with grouping fields
 - `scripts/fetch_etf_history.py`: fetch and cache ETF daily history from AKShare
 - `scripts/run_rotation_backtest.py`: run a simple momentum rotation backtest
+- `scripts/run_grouped_backtests.py`: batch backtest every ETF group or strategy tag
 - `reports/rotation/`: generated equity curve, weights, and summary metrics
 
 ## Sample universe
@@ -83,6 +84,23 @@ python .\scripts\run_rotation_backtest.py --strategy-tag satellite
 ```
 
 Grouped reports are written into subfolders such as `reports/rotation/group_broad/`.
+
+If you want a summary table across every watchlist group:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python .\scripts\run_grouped_backtests.py --group-field group
+python .\scripts\run_grouped_backtests.py --group-field strategy_tag
+```
+
+You can also limit the batch run:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python .\scripts\run_grouped_backtests.py --group-field group --values broad,growth
+```
+
+This writes aggregate files such as `reports/rotation/summary_by_group.csv`.
 
 The sample strategy rebalances every 5 trading days, ranks ETFs by 20-day momentum, and holds the top 1 ETF when its momentum is positive. Transaction costs are approximated with commission and slippage in basis points.
 
