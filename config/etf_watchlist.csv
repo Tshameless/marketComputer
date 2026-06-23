@@ -1,6 +1,6 @@
-symbol,name
-510300,沪深300ETF
-510500,中证500ETF
-159915,创业板ETF
-588000,科创50ETF
-513100,纳指ETF
+symbol,name,group,strategy_tag,notes
+510300,沪深300ETF,broad,core,宽基核心仓位
+510500,中证500ETF,broad,satellite,偏成长补充
+159915,创业板ETF,growth,satellite,高波动成长
+588000,科创50ETF,growth,satellite,科创成长暴露
+513100,纳指ETF,overseas,satellite,跨市场科技暴露

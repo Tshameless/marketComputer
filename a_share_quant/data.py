@@ -32,8 +32,8 @@ def fetch_etf_history(
     start_date: str,
     end_date: str,
     adjust: str = "qfq",
-    retries: int = 3,
-    sleep_seconds: float = 2.0,
+    retries: int = 5,
+    sleep_seconds: float = 3.0,
 ) -> pd.DataFrame:
     last_error: Exception | None = None
     for attempt in range(1, retries + 1):

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from a_share_quant.config import load_project_config
+from a_share_quant.config import filter_universe, load_project_config
 from a_share_quant.data import fetch_etf_history, save_history, save_spot_snapshot
 
 
@@ -16,6 +16,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--start-date", help="Override fetch start date, format YYYYMMDD.")
     parser.add_argument("--end-date", help="Override fetch end date, format YYYYMMDD.")
+    parser.add_argument("--group", help="Only fetch ETFs from the specified group.")
+    parser.add_argument("--strategy-tag", help="Only fetch ETFs with the specified strategy tag.")
     return parser.parse_args()
 
 
@@ -28,16 +30,29 @@ def main() -> None:
     end_date = args.end_date or config["data"]["end_date"]
     adjust = config["data"].get("adjust", "qfq")
     cache_dir = root / "data" / "cache"
+    universe = filter_universe(config["universe"], group=args.group, strategy_tag=args.strategy_tag)
 
     snapshot_path = save_spot_snapshot(root / "data" / "etf_spot_snapshot.csv")
     print(f"saved ETF spot snapshot -> {snapshot_path}")
+    print(f"fetch universe size: {len(universe)}")
 
-    for item in config["universe"]:
+    succeeded = 0
+    failures: list[str] = []
+    for item in universe:
         symbol = item["symbol"]
         name = item["name"]
-        frame = fetch_etf_history(symbol=symbol, start_date=start_date, end_date=end_date, adjust=adjust)
-        output_path = save_history(frame, cache_dir / f"{symbol}.csv")
-        print(f"saved {symbol} {name} -> {output_path}")
+        try:
+            frame = fetch_etf_history(symbol=symbol, start_date=start_date, end_date=end_date, adjust=adjust)
+            output_path = save_history(frame, cache_dir / f"{symbol}.csv")
+            succeeded += 1
+            print(f"saved {symbol} {name} -> {output_path}")
+        except Exception as error:
+            failures.append(symbol)
+            print(f"failed {symbol} {name}: {error}")
+
+    print(f"fetch completed: {succeeded} succeeded, {len(failures)} failed")
+    if failures:
+        raise RuntimeError(f"failed symbols: {', '.join(failures)}")
 
 
 if __name__ == "__main__":

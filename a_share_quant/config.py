@@ -38,5 +38,28 @@ def load_universe_csv(path: str | Path) -> list[dict[str, str]]:
             name = (row.get("name") or "").strip()
             if not symbol or not name:
                 raise ValueError(f"invalid universe row at line {index}: symbol and name are required")
-            rows.append({"symbol": symbol, "name": name})
+            rows.append(
+                {
+                    "symbol": symbol,
+                    "name": name,
+                    "group": (row.get("group") or "").strip(),
+                    "strategy_tag": (row.get("strategy_tag") or "").strip(),
+                    "notes": (row.get("notes") or "").strip(),
+                }
+            )
     return rows
+
+
+def filter_universe(
+    universe: list[dict[str, str]],
+    group: str | None = None,
+    strategy_tag: str | None = None,
+) -> list[dict[str, str]]:
+    filtered = universe
+    if group:
+        filtered = [item for item in filtered if item.get("group") == group]
+    if strategy_tag:
+        filtered = [item for item in filtered if item.get("strategy_tag") == strategy_tag]
+    if not filtered:
+        raise ValueError("no instruments matched the requested universe filters")
+    return filtered
