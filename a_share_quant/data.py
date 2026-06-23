@@ -27,6 +27,10 @@ def fetch_etf_spot() -> pd.DataFrame:
     return ak.fund_etf_spot_em()
 
 
+def fetch_lof_spot() -> pd.DataFrame:
+    return ak.fund_lof_spot_em()
+
+
 def fetch_etf_history(
     symbol: str,
     start_date: str,
@@ -52,6 +56,48 @@ def fetch_etf_history(
                 break
             time.sleep(sleep_seconds * attempt)
     raise RuntimeError(f"failed to fetch ETF history for {symbol}") from last_error
+
+
+def fetch_lof_history(
+    symbol: str,
+    start_date: str,
+    end_date: str,
+    adjust: str = "qfq",
+    retries: int = 5,
+    sleep_seconds: float = 3.0,
+) -> pd.DataFrame:
+    last_error: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            frame = ak.fund_lof_hist_em(
+                symbol=symbol,
+                period="daily",
+                start_date=start_date,
+                end_date=end_date,
+                adjust=adjust,
+            )
+            return normalize_etf_history(frame, symbol=symbol)
+        except Exception as error:  # pragma: no cover - network instability depends on upstream
+            last_error = error
+            if attempt == retries:
+                break
+            time.sleep(sleep_seconds * attempt)
+    raise RuntimeError(f"failed to fetch LOF history for {symbol}") from last_error
+
+
+def fetch_fund_history(
+    symbol: str,
+    instrument_type: str,
+    start_date: str,
+    end_date: str,
+    adjust: str = "qfq",
+) -> pd.DataFrame:
+    normalized_type = instrument_type.upper()
+    if normalized_type == "ETF":
+        return fetch_etf_history(symbol=symbol, start_date=start_date, end_date=end_date, adjust=adjust)
+    if normalized_type == "LOF":
+        return fetch_lof_history(symbol=symbol, start_date=start_date, end_date=end_date, adjust=adjust)
+    raise ValueError(f"unsupported instrument_type for {symbol}: {instrument_type}")
 
 
 def normalize_etf_history(frame: pd.DataFrame, symbol: str) -> pd.DataFrame:

@@ -42,6 +42,7 @@ def load_universe_csv(path: str | Path) -> list[dict[str, str]]:
                 {
                     "symbol": symbol,
                     "name": name,
+                    "instrument_type": ((row.get("instrument_type") or "ETF").strip() or "ETF").upper(),
                     "group": (row.get("group") or "").strip(),
                     "strategy_tag": (row.get("strategy_tag") or "").strip(),
                     "notes": (row.get("notes") or "").strip(),

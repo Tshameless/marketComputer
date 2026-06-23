@@ -30,13 +30,14 @@ You can replace these with your own ETF or fund pool by editing `config/etf_watc
 The CSV format is:
 
 ```csv
-symbol,name,group,strategy_tag,notes
-510300,沪深300ETF,broad,core,宽基核心仓位
-159915,创业板ETF,growth,satellite,高波动成长
+symbol,name,instrument_type,group,strategy_tag,notes
+510300,沪深300ETF,ETF,broad,core,宽基核心仓位
+164701,汇添富黄金及贵金属(QDII-LOF-FOF)A,LOF,commodity,candidate,黄金主题补充
 ```
 
 Suggested meaning:
 
+- `instrument_type`: currently supports `ETF` and `LOF`
 - `group`: your pool grouping such as `broad`, `dividend`, `bond`, `commodity`
 - `strategy_tag`: your usage tag such as `core`, `satellite`, `rotation`
 - `notes`: free-form reminders about why this ETF is in the pool

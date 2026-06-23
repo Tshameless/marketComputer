@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from a_share_quant.config import filter_universe, load_project_config
-from a_share_quant.data import fetch_etf_history, save_history, save_spot_snapshot
+from a_share_quant.data import fetch_fund_history, fetch_lof_spot, save_history, save_spot_snapshot
 
 
 def parse_args() -> argparse.Namespace:
@@ -32,8 +32,15 @@ def main() -> None:
     cache_dir = root / "data" / "cache"
     universe = filter_universe(config["universe"], group=args.group, strategy_tag=args.strategy_tag)
 
-    snapshot_path = save_spot_snapshot(root / "data" / "etf_spot_snapshot.csv")
-    print(f"saved ETF spot snapshot -> {snapshot_path}")
+    etf_snapshot_path = save_spot_snapshot(root / "data" / "etf_spot_snapshot.csv")
+    print(f"saved ETF spot snapshot -> {etf_snapshot_path}")
+    try:
+        lof_snapshot = fetch_lof_spot()
+        lof_snapshot_path = root / "data" / "lof_spot_snapshot.csv"
+        lof_snapshot.to_csv(lof_snapshot_path, index=False, encoding="utf-8-sig")
+        print(f"saved LOF spot snapshot -> {lof_snapshot_path}")
+    except Exception as error:
+        print(f"skip LOF spot snapshot: {error}")
     print(f"fetch universe size: {len(universe)}")
 
     succeeded = 0
@@ -41,14 +48,21 @@ def main() -> None:
     for item in universe:
         symbol = item["symbol"]
         name = item["name"]
+        instrument_type = item.get("instrument_type", "ETF")
         try:
-            frame = fetch_etf_history(symbol=symbol, start_date=start_date, end_date=end_date, adjust=adjust)
+            frame = fetch_fund_history(
+                symbol=symbol,
+                instrument_type=instrument_type,
+                start_date=start_date,
+                end_date=end_date,
+                adjust=adjust,
+            )
             output_path = save_history(frame, cache_dir / f"{symbol}.csv")
             succeeded += 1
-            print(f"saved {symbol} {name} -> {output_path}")
+            print(f"saved {symbol} {name} [{instrument_type}] -> {output_path}")
         except Exception as error:
             failures.append(symbol)
-            print(f"failed {symbol} {name}: {error}")
+            print(f"failed {symbol} {name} [{instrument_type}]: {error}")
 
     print(f"fetch completed: {succeeded} succeeded, {len(failures)} failed")
     if failures:
