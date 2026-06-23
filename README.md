@@ -8,14 +8,15 @@ This project is a minimal A-share ETF research stack for the path we discussed:
 
 ## What is included
 
-- `config/universe.yaml`: editable ETF universe and backtest parameters
+- `config/universe.yaml`: strategy and data parameters
+- `config/etf_watchlist.csv`: your editable ETF watchlist
 - `scripts/fetch_etf_history.py`: fetch and cache ETF daily history from AKShare
 - `scripts/run_rotation_backtest.py`: run a simple momentum rotation backtest
 - `reports/rotation/`: generated equity curve, weights, and summary metrics
 
 ## Sample universe
 
-The default ETF basket is a broad-index starter set:
+The default ETF basket lives in `config/etf_watchlist.csv`:
 
 - `510300` 沪深300ETF
 - `510500` 中证500ETF
@@ -23,7 +24,15 @@ The default ETF basket is a broad-index starter set:
 - `588000` 科创50ETF
 - `513100` 纳指ETF
 
-You can replace these with your own ETF or fund pool in `config/universe.yaml`.
+You can replace these with your own ETF or fund pool by editing `config/etf_watchlist.csv`.
+
+The CSV format is:
+
+```csv
+symbol,name
+510300,沪深300ETF
+159915,创业板ETF
+```
 
 ## Environment
 

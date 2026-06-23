@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from a_share_quant.config import load_yaml
+from a_share_quant.config import load_project_config
 from a_share_quant.data import fetch_etf_history, save_history, save_spot_snapshot
 
 
@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     root = Path(__file__).resolve().parents[1]
-    config = load_yaml(args.config)
+    config = load_project_config(args.config)
 
     start_date = args.start_date or config["data"]["start_date"]
     end_date = args.end_date or config["data"]["end_date"]

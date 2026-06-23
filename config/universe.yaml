@@ -1,14 +1,4 @@
-universe:
-  - symbol: "510300"
-    name: "沪深300ETF"
-  - symbol: "510500"
-    name: "中证500ETF"
-  - symbol: "159915"
-    name: "创业板ETF"
-  - symbol: "588000"
-    name: "科创50ETF"
-  - symbol: "513100"
-    name: "纳指ETF"
+universe_file: "etf_watchlist.csv"
 
 data:
   start_date: "20190101"
