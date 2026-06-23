@@ -1,0 +1,27 @@
+universe:
+  - symbol: "510300"
+    name: "沪深300ETF"
+  - symbol: "510500"
+    name: "中证500ETF"
+  - symbol: "159915"
+    name: "创业板ETF"
+  - symbol: "588000"
+    name: "科创50ETF"
+  - symbol: "513100"
+    name: "纳指ETF"
+
+data:
+  start_date: "20190101"
+  end_date: "20261231"
+  adjust: "qfq"
+
+backtest:
+  start_date: "20200101"
+  end_date: "20261231"
+  initial_capital: 1000000
+  lookback_days: 20
+  rebalance_every: 5
+  top_n: 1
+  min_momentum: 0.0
+  commission_bps: 2.0
+  slippage_bps: 1.0

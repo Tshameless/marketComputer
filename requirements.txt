@@ -1,0 +1,6 @@
+akshare==1.18.64
+matplotlib>=3.11,<3.12
+numpy>=1.26,<2.0
+pandas>=2.3,<3.0
+PyYAML>=6.0,<7.0
+rqalpha==6.1.5
