@@ -184,6 +184,7 @@ You can batch update watchlist rows without editing the CSV by hand:
 $env:PYTHONPATH = (Get-Location).Path
 python .\scripts\update_watchlist.py --symbols 513500,159941 --priority 2 --group overseas --dry-run
 python .\scripts\update_watchlist.py --symbols 562500,159227 --enabled 0
+python .\scripts\update_watchlist.py --symbols 513500 --priority 2 --post-refresh view
 ```
 
 You can also prepare a small changes CSV and import it in one shot:
@@ -211,6 +212,12 @@ Supported update fields:
 - `group`
 - `strategy-tag`
 - `notes`
+
+Optional post-update refresh:
+
+- `--post-refresh view`
+- `--post-refresh dashboard`
+- `--post-refresh all`
 
 The sample strategy rebalances every 5 trading days, ranks ETFs by 20-day momentum, and holds the top 1 ETF when its momentum is positive. Transaction costs are approximated with commission and slippage in basis points.
 

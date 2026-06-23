@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 from a_share_quant.config import (
@@ -56,6 +59,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--group", help="Set the group field.")
     parser.add_argument("--strategy-tag", help="Set the strategy_tag field.")
     parser.add_argument("--notes", help="Set the notes field.")
+    parser.add_argument(
+        "--post-refresh",
+        choices=["none", "view", "dashboard", "all"],
+        default="none",
+        help="Optional post-update refresh: watchlist view, research dashboard, or both.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Preview updates without writing the CSV.")
     return parser.parse_args()
 
@@ -140,10 +149,26 @@ def load_rows(path: str | Path) -> list[dict[str, str]]:
 
 def save_rows(path: str | Path, rows: list[dict[str, str]]) -> None:
     csv_path = Path(path)
-    with csv_path.open("w", encoding="utf-8-sig", newline="") as handle:
+    with csv_path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=FIELDNAMES)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def run_post_refresh(args: argparse.Namespace) -> None:
+    root = Path(__file__).resolve().parents[1]
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(root)
+
+    # Reuse the current interpreter so the refresh scripts run in the same environment.
+    commands: list[list[str]] = []
+    if args.post_refresh in {"view", "all"}:
+        commands.append([sys.executable, str(root / "scripts" / "export_watchlist_view.py")])
+    if args.post_refresh in {"dashboard", "all"}:
+        commands.append([sys.executable, str(root / "scripts" / "export_research_dashboard.py")])
+
+    for command in commands:
+        subprocess.run(command, cwd=root, check=True, env=env)
 
 
 def apply_updates_to_rows(
@@ -191,6 +216,8 @@ def main() -> None:
 
     if not args.dry_run:
         save_rows(args.watchlist, rows)
+        if args.post_refresh != "none":
+            run_post_refresh(args)
 
     action = "preview" if args.dry_run else "updated"
     print(f"{action} symbols: {', '.join(matched_symbols)}")
