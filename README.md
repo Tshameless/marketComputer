@@ -17,6 +17,7 @@ This project is a minimal A-share ETF research stack for the path we discussed:
 - `scripts/run_preset_backtests.py`: batch backtest named preset portfolios
 - `scripts/export_watchlist_view.py`: export a manual rebalance view from the watchlist metadata
 - `scripts/export_research_dashboard.py`: combine watchlist and preset outputs into a research dashboard
+- `scripts/update_watchlist.py`: batch edit watchlist fields by symbol
 - `reports/rotation/`: generated equity curve, weights, and summary metrics
 
 ## Sample universe
@@ -174,6 +175,26 @@ This writes:
 - `reports/dashboard/dashboard_top_priority.csv`
 - `reports/dashboard/dashboard_presets.csv`
 - `reports/dashboard/research_dashboard.md`
+
+## Batch edit the watchlist
+
+You can batch update watchlist rows without editing the CSV by hand:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python .\scripts\update_watchlist.py --symbols 513500,159941 --priority 2 --group overseas --dry-run
+python .\scripts\update_watchlist.py --symbols 562500,159227 --enabled 0
+```
+
+Supported update fields:
+
+- `enabled`
+- `priority`
+- `target-weight-hint`
+- `instrument-type`
+- `group`
+- `strategy-tag`
+- `notes`
 
 The sample strategy rebalances every 5 trading days, ranks ETFs by 20-day momentum, and holds the top 1 ETF when its momentum is positive. Transaction costs are approximated with commission and slippage in basis points.
 
