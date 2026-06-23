@@ -42,6 +42,7 @@ def load_universe_csv(path: str | Path) -> list[dict[str, str]]:
                 {
                     "symbol": symbol,
                     "name": name,
+                    "enabled": parse_enabled_value(row.get("enabled")),
                     "instrument_type": ((row.get("instrument_type") or "ETF").strip() or "ETF").upper(),
                     "group": (row.get("group") or "").strip(),
                     "strategy_tag": (row.get("strategy_tag") or "").strip(),
@@ -51,12 +52,24 @@ def load_universe_csv(path: str | Path) -> list[dict[str, str]]:
     return rows
 
 
+def parse_enabled_value(raw_value: str | None) -> bool:
+    value = (raw_value or "").strip().lower()
+    if value in {"", "1", "true", "yes", "y", "on"}:
+        return True
+    if value in {"0", "false", "no", "n", "off"}:
+        return False
+    raise ValueError(f"invalid enabled value: {raw_value}")
+
+
 def filter_universe(
     universe: list[dict[str, str]],
     group: str | None = None,
     strategy_tag: str | None = None,
+    include_disabled: bool = False,
 ) -> list[dict[str, str]]:
     filtered = universe
+    if not include_disabled:
+        filtered = [item for item in filtered if item.get("enabled", True)]
     if group:
         filtered = [item for item in filtered if item.get("group") == group]
     if strategy_tag:
@@ -73,8 +86,11 @@ def apply_universe_filters(
     strategy_tags: list[str] | None = None,
     instrument_types: list[str] | None = None,
     symbols: list[str] | None = None,
+    include_disabled: bool = False,
 ) -> list[dict[str, str]]:
     filtered = universe
+    if not include_disabled:
+        filtered = [item for item in filtered if item.get("enabled", True)]
     if groups:
         allowed_groups = set(groups)
         filtered = [item for item in filtered if item.get("group") in allowed_groups]

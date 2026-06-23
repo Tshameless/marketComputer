@@ -34,6 +34,7 @@ def parse_args() -> argparse.Namespace:
         default=str(Path(__file__).resolve().parents[1] / "reports" / "rotation"),
         help="Directory for backtest outputs.",
     )
+    parser.add_argument("--include-disabled", action="store_true", help="Include disabled watchlist rows.")
     return parser.parse_args()
 
 
@@ -61,11 +62,16 @@ def run_single_batch(
     field_name: str,
     field_value: str,
     output_dir: Path,
+    include_disabled: bool,
 ) -> dict[str, object]:
     if field_name == "group":
-        universe = filter_universe(config["universe"], group=field_value)
+        universe = filter_universe(config["universe"], group=field_value, include_disabled=include_disabled)
     else:
-        universe = filter_universe(config["universe"], strategy_tag=field_value)
+        universe = filter_universe(
+            config["universe"],
+            strategy_tag=field_value,
+            include_disabled=include_disabled,
+        )
 
     symbols = [item["symbol"] for item in universe]
     history_map = load_cached_histories(root / "data" / "cache", symbols)
@@ -99,7 +105,10 @@ def main() -> None:
     root = Path(__file__).resolve().parents[1]
     config = load_project_config(args.config)
     requested_values = parse_requested_values(args.values)
-    available_values = collect_field_values(config["universe"], args.group_field)
+    base_universe = config["universe"] if args.include_disabled else [
+        item for item in config["universe"] if item.get("enabled", True)
+    ]
+    available_values = collect_field_values(base_universe, args.group_field)
     values_to_run = requested_values or available_values
 
     missing_values = sorted(set(values_to_run) - set(available_values))
@@ -120,6 +129,7 @@ def main() -> None:
                 field_name=args.group_field,
                 field_value=field_value,
                 output_dir=report_dir,
+                include_disabled=args.include_disabled,
             )
             summary_rows.append(summary_row)
             print(f"completed {args.group_field}={field_value} -> {report_dir}")

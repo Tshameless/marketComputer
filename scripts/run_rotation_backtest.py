@@ -23,6 +23,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--group", help="Only backtest ETFs from the specified group.")
     parser.add_argument("--strategy-tag", help="Only backtest ETFs with the specified strategy tag.")
+    parser.add_argument("--include-disabled", action="store_true", help="Include disabled watchlist rows.")
     return parser.parse_args()
 
 
@@ -42,7 +43,12 @@ def main() -> None:
     args = parse_args()
     root = Path(__file__).resolve().parents[1]
     config = load_project_config(args.config)
-    universe = filter_universe(config["universe"], group=args.group, strategy_tag=args.strategy_tag)
+    universe = filter_universe(
+        config["universe"],
+        group=args.group,
+        strategy_tag=args.strategy_tag,
+        include_disabled=args.include_disabled,
+    )
     symbols = [item["symbol"] for item in universe]
     history_map = load_cached_histories(root / "data" / "cache", symbols)
     close_matrix = build_close_matrix(history_map)

@@ -32,13 +32,14 @@ You can replace these with your own ETF or fund pool by editing `config/etf_watc
 The CSV format is:
 
 ```csv
-symbol,name,instrument_type,group,strategy_tag,notes
-510300,沪深300ETF,ETF,broad,core,宽基核心仓位
-164701,汇添富黄金及贵金属(QDII-LOF-FOF)A,LOF,commodity,candidate,黄金主题补充
+symbol,name,enabled,instrument_type,group,strategy_tag,notes
+510300,沪深300ETF,1,ETF,broad,core,宽基核心仓位
+164701,汇添富黄金及贵金属(QDII-LOF-FOF)A,1,LOF,commodity,candidate,黄金主题补充
 ```
 
 Suggested meaning:
 
+- `enabled`: `1` means the symbol is active in normal fetches and backtests; `0` keeps it in the watchlist but skips it by default
 - `instrument_type`: currently supports `ETF` and `LOF`
 - `group`: your pool grouping such as `broad`, `dividend`, `bond`, `commodity`
 - `strategy_tag`: your usage tag such as `core`, `satellite`, `rotation`
@@ -69,6 +70,7 @@ You can fetch only part of the watchlist:
 $env:PYTHONPATH = (Get-Location).Path
 python .\scripts\fetch_etf_history.py --group broad
 python .\scripts\fetch_etf_history.py --strategy-tag core
+python .\scripts\fetch_etf_history.py --strategy-tag candidate --include-disabled
 ```
 
 ## Run the sample backtest
@@ -84,6 +86,7 @@ You can also run a grouped backtest:
 $env:PYTHONPATH = (Get-Location).Path
 python .\scripts\run_rotation_backtest.py --group broad
 python .\scripts\run_rotation_backtest.py --strategy-tag satellite
+python .\scripts\run_rotation_backtest.py --strategy-tag candidate --include-disabled
 ```
 
 Grouped reports are written into subfolders such as `reports/rotation/group_broad/`.
@@ -126,6 +129,7 @@ Run a single preset:
 ```powershell
 $env:PYTHONPATH = (Get-Location).Path
 python .\scripts\run_preset_backtests.py --preset candidate_pool
+python .\scripts\run_preset_backtests.py --preset candidate_pool --include-disabled
 ```
 
 This writes aggregate files such as `reports/presets/summary_by_preset.csv`.

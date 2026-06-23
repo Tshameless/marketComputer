@@ -30,6 +30,7 @@ def parse_args() -> argparse.Namespace:
         default=str(Path(__file__).resolve().parents[1] / "reports" / "presets"),
         help="Directory for preset backtest outputs.",
     )
+    parser.add_argument("--include-disabled", action="store_true", help="Include disabled watchlist rows.")
     return parser.parse_args()
 
 
@@ -51,6 +52,7 @@ def run_single_preset(
     preset_name: str,
     preset_filters: dict,
     output_dir: Path,
+    include_disabled: bool,
 ) -> dict[str, object]:
     universe = apply_universe_filters(
         config["universe"],
@@ -58,6 +60,7 @@ def run_single_preset(
         strategy_tags=preset_filters.get("strategy_tags"),
         instrument_types=preset_filters.get("instrument_types"),
         symbols=preset_filters.get("symbols"),
+        include_disabled=include_disabled,
     )
     symbols = [item["symbol"] for item in universe]
     history_map = load_cached_histories(root / "data" / "cache", symbols)
@@ -107,6 +110,7 @@ def main() -> None:
                 preset_name=preset_name,
                 preset_filters=preset_filters,
                 output_dir=report_dir,
+                include_disabled=args.include_disabled,
             )
             summary_rows.append(summary_row)
             print(f"completed preset={preset_name} -> {report_dir}")

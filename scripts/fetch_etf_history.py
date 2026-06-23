@@ -18,6 +18,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--end-date", help="Override fetch end date, format YYYYMMDD.")
     parser.add_argument("--group", help="Only fetch ETFs from the specified group.")
     parser.add_argument("--strategy-tag", help="Only fetch ETFs with the specified strategy tag.")
+    parser.add_argument("--include-disabled", action="store_true", help="Include disabled watchlist rows.")
     return parser.parse_args()
 
 
@@ -30,7 +31,12 @@ def main() -> None:
     end_date = args.end_date or config["data"]["end_date"]
     adjust = config["data"].get("adjust", "qfq")
     cache_dir = root / "data" / "cache"
-    universe = filter_universe(config["universe"], group=args.group, strategy_tag=args.strategy_tag)
+    universe = filter_universe(
+        config["universe"],
+        group=args.group,
+        strategy_tag=args.strategy_tag,
+        include_disabled=args.include_disabled,
+    )
 
     etf_snapshot_path = save_spot_snapshot(root / "data" / "etf_spot_snapshot.csv")
     print(f"saved ETF spot snapshot -> {etf_snapshot_path}")
