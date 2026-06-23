@@ -186,6 +186,22 @@ python .\scripts\update_watchlist.py --symbols 513500,159941 --priority 2 --grou
 python .\scripts\update_watchlist.py --symbols 562500,159227 --enabled 0
 ```
 
+You can also prepare a small changes CSV and import it in one shot:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+python .\scripts\update_watchlist.py --updates-file .\work\watchlist_updates.csv --dry-run
+python .\scripts\update_watchlist.py --updates-file .\work\watchlist_updates.csv
+```
+
+Example updates file:
+
+```csv
+symbol,priority,target_weight_hint,group,notes
+513500,2,0.08,overseas,提高优先级
+562500,4,0.03,theme,暂时降权观察
+```
+
 Supported update fields:
 
 - `enabled`
